@@ -118,7 +118,7 @@ assign rd_data2 = registers[rt];
 
 //write to the register file
 assign write_ptr = RegDst ? rd : rt; //wich register to write to (mux for write register)
-always_comb begin : rf_write
+always_comb begin : rf_write         //rf_write is the name of the always_comb block
     next_registers = registers;      //default
     if (RegWrite) begin
         next_registers[write_ptr] = write_data_reg;
