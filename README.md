@@ -12,3 +12,9 @@ it will print the values of the registers and the memory so we can see and check
 ## MIPS CPU - test
 using python we will create a sw "assembler" that will convert the assembly code to machine code. and will create a memory file that will be used by the TB.
 
+### to sum up:  
+|file name | description|
+|----------|----------|
+| rtl | mips module: the actual design files of the MIPS CPU |
+| verif | holds testbenches and focuses on testing individual components (like the ALU, register file, and control unit) |
+| app | (Application) Stores MIPS assembly programs for application-level testing (confirms that the entire CPU functions correctly as an integrated system) |
