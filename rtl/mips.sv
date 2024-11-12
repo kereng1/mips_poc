@@ -16,6 +16,10 @@ end
     end                                        \
 end
 
+//define the SIGN_EXTEND macro
+`define SIGN_EXTEND(TOTAL_SIZE, DATA) ({{TOTAL_SIZE-$bits(DATA){DATA[$bits(DATA)-1]}}, DATA})
+
+
 module mips(
     input logic clk,
     input logic rst
@@ -48,6 +52,22 @@ logic       ALUOp;
 logic       MemWrite;
 logic       ALUSrc;
 logic       RegWrite;
+
+logic [31:0] sign_extended_imm; //sign extended immidiate value
+logic [31:0] alu_in1;
+logic [31:0] alu_in2;
+
+typedef enum logic [5:0] {
+    ADD = 6'b100000,
+    SUB = 6'b100010,
+    AND = 6'b100100,
+    OR = 6'b100101,
+    NOR = 6'b100111,
+    XOR = 6'b100110,
+    SLT = 6'b101010
+}t_alu_ctrl;
+
+t_alu_ctrl ALUCtrl; //ALU control signals
 
 //defining the opcode
 typedef enum logic [5:0] {
@@ -83,7 +103,7 @@ assign instruction[31:24] = i_mem[pc[31:0]+3];
 //DECODE
 //=====================
 // 1) decode the instruction: reading from refister_file, and control signals
-// 2) speculated calculation of branch address (sighn extension)
+// 2) sighn extension for immidiate values and speculated calculation of branch address
 t_opcode opcode; //define opcode variable of type t_opcode (like list/stuct in C)
 assign opcode[5:0] = instruction[31:26];
 
@@ -100,6 +120,7 @@ assign RegWrite = (opcode == R_TYPE || opcode == LW || opcode == ADDI);
 assign rs = instruction[25:21];
 assign rt = instruction[20:16];
 assign rd = instruction[15:11];
+assign sign_extended_imm = `SIGN_EXTEND(32, nstruction[15:0]);
 
 //.....................
 //Register File
@@ -127,19 +148,37 @@ always_comb begin : rf_write         //rf_write is the name of the always_comb b
 end 
 
 
+//================
+//EXECUTE
+//================
+// 1) ALU operation
+// 2) branch evaluation and jump calculation
+
+//ALU
+assign alu_in1 = rd_data1;
+assign alu_in2 = ALUSrc ? sign_extended_imm : rd_data2;
+
+//ALU control
+ALUCtrl = ALUOp ? instruction[5:0] : 6'b000000; //if ALUOp=Rtype then ALU control is the funct field
 
 
-
+//ALU operation
+always_comb begin : alu
+    case (ALUCtrl) //ALUCtrl is the output of ALU control
+        ADD: alu_result = alu_in1 + alu_in2;
+        SUB: alu_result = alu_in1 - alu_in2;
+        AND: alu_result = alu_in1 & alu_in2;
+        OR: alu_result = alu_in1 | alu_in2;
+        NOR: alu_result = ~(alu_in1 | alu_in2);
+        XOR: alu_result = alu_in1 ^ alu_in2;
+        SLT: alu_result = (alu_in1 < alu_in2) ? 1 : 0;
+        default: alu_result = alu_in1 + alu_in2; //default is ADD
+    endcase
 
 
 
 //write back
 assign write_data_reg = MemtoReg ? read_data : alu_result;
-
-
-
-
-
 
 
 endmodule
