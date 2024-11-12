@@ -57,6 +57,7 @@ logic [31:0] sign_extended_imm; //sign extended immidiate value
 logic [31:0] alu_in1;
 logic [31:0] alu_in2;
 
+//defining the instruction signal for ALU control
 typedef enum logic [5:0] {
     ADD = 6'b100000,
     SUB = 6'b100010,
@@ -69,7 +70,7 @@ typedef enum logic [5:0] {
 
 t_alu_ctrl ALUCtrl; //ALU control signals
 
-//defining the opcode
+//defining the opcode input for the main control unit
 typedef enum logic [5:0] {
     R_TYPE = 6'b000000,
     ADDI = 6'b001000,
@@ -158,8 +159,20 @@ end
 assign alu_in1 = rd_data1;
 assign alu_in2 = ALUSrc ? sign_extended_imm : rd_data2;
 
+//////////////////////////////////////////////////////////////////////////////
 //ALU control
 ALUCtrl = ALUOp ? instruction[5:0] : 6'b000000; //if ALUOp=Rtype then ALU control is the funct field
+///////////////////////////AMICHAI//////////////////////////////////////////
+
+// ALU control logic based on ALUOp 
+always_comb begin
+    case (ALUOp)
+        R_TYPE: ALUCtrl = instruction[5:0];   // Use funct field for R-type
+        BRANCH: ALUCtrl = SUB;                // Set to SUB for branch comparison
+        LOAD_STORE: ALUCtrl = ADD;            // Set to ADD for load/store address calculation
+        default: ALUCtrl = ADD;               // Default to ADD
+    endcase
+end
 
 
 //ALU operation
@@ -168,7 +181,7 @@ always_comb begin : alu
         ADD: alu_result = alu_in1 + alu_in2;
         SUB: alu_result = alu_in1 - alu_in2;
         AND: alu_result = alu_in1 & alu_in2;
-        OR: alu_result = alu_in1 | alu_in2;
+        OR: alu_result = alu_in1 | alu_in2;`
         NOR: alu_result = ~(alu_in1 | alu_in2);
         XOR: alu_result = alu_in1 ^ alu_in2;
         SLT: alu_result = (alu_in1 < alu_in2) ? 1 : 0;
