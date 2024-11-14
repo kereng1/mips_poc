@@ -174,23 +174,46 @@ always_comb begin
     endcase
 end
 
-
 //ALU operation
 always_comb begin : alu
     case (ALUCtrl) //ALUCtrl is the output of ALU control
         ADD: alu_result = alu_in1 + alu_in2;
         SUB: alu_result = alu_in1 - alu_in2;
         AND: alu_result = alu_in1 & alu_in2;
-        OR: alu_result = alu_in1 | alu_in2;`
+        OR:  alu_result = alu_in1 | alu_in2;
         NOR: alu_result = ~(alu_in1 | alu_in2);
         XOR: alu_result = alu_in1 ^ alu_in2;
         SLT: alu_result = (alu_in1 < alu_in2) ? 1 : 0;
         default: alu_result = alu_in1 + alu_in2; //default is ADD
     endcase
 
+//================
+//MEMORY
+//================
+// 1) read/write to data memory
+
+//read from data memory
+`Dff (d_mem, next_d_mem, clk); //dff for the data memory
+assign read_data[7:0] = d_mem[alu_result[31:0]+0];
+assign read_data[15:8] = d_mem[alu_result[31:0]+1];
+assign read_data[23:16] = d_mem[alu_result[31:0]+2];
+assign read_data[31:24] = d_mem[alu_result[31:0]+3];
+
+assign write_data_mem = rd_data2; //data to write to the data memory
+
+//write to the data memory
+always_comb begin : mem_write
+    next_d_mem = next_d_mem: d_mem; //default
+    if (MemWrite) begin
+        next_d_mem[alu_result[31:0] +0] = write_data_mem[7:0];
+        next_d_mem[alu_result[31:0] +1] = write_data_mem[15:8];
+        next_d_mem[alu_result[31:0] +2] = write_data_mem[23:16];
+        next_d_mem[alu_result[31:0] +3] = write_data_mem[31:24];
+    end
+end 
 
 
-//write back
+//write back to the register file
 assign write_data_reg = MemtoReg ? read_data : alu_result;
 
 
