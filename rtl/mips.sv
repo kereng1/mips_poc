@@ -28,8 +28,12 @@ module mips(
 //cyncronic signals - ff outputs
 logic [31:0] pc;
 logic [31:0] next_pc; 
+logic [31:0] pc_plus4; 
+logic [31:0] branch_or_PcPlus4; //mux output for branch
 logic [31:0] registers[31:0];
-logic [31:0] next_registers[31:0]; //?????????is this the Write register in ss mips??????
+logic [31:0] next_registers[31:0]; 
+logic [31:0] branch_target; //branch target address
+logic [31:0] jump_target; //jump target address
 
 logic [31:0] instruction;
 logic [7:0] i_mem [127: 0]; //instruction memory matrix 128x32 each instruction (row) is 32 bits
@@ -52,6 +56,10 @@ logic       ALUOp;
 logic       MemWrite;
 logic       ALUSrc;
 logic       RegWrite;
+
+logic       zero;
+logic       sel_branch;
+logic       sel_jump;
 
 logic [31:0] sign_extended_imm; //sign extended immidiate value
 logic [31:0] alu_in1;
@@ -86,7 +94,7 @@ typedef enum logic [5:0] {
 // 1) get the instruction from memory
 // 2) pc <= pc + 4  increment the pc by 4
 
-assign next_pc = pc + 4;
+assign pc_plus4 = pc + 4;
 `RST_DFF(pc, next_pc, clk, rst); //PC dff macro
 
 // the INSTRUCTION MEMORY dff "array"
@@ -144,8 +152,7 @@ always_comb begin : rf_write         //rf_write is the name of the always_comb b
     next_registers = registers;      //default
     if (RegWrite) begin
         next_registers[write_ptr] = write_data_reg;
-    end
-    
+    end 
 end 
 
 
@@ -158,11 +165,6 @@ end
 //ALU
 assign alu_in1 = rd_data1;
 assign alu_in2 = ALUSrc ? sign_extended_imm : rd_data2;
-
-//////////////////////////////////////////////////////////////////////////////
-//ALU control
-ALUCtrl = ALUOp ? instruction[5:0] : 6'b000000; //if ALUOp=Rtype then ALU control is the funct field
-///////////////////////////AMICHAI//////////////////////////////////////////
 
 // ALU control logic based on ALUOp 
 always_comb begin
@@ -186,6 +188,18 @@ always_comb begin : alu
         SLT: alu_result = (alu_in1 < alu_in2) ? 1 : 0;
         default: alu_result = alu_in1 + alu_in2; //default is ADD
     endcase
+    zero = (alu_result == 0); //set the zero flag
+end 
+
+//Branch 
+assign branch_target = pc + 4 + (sign_extended_imm << 2); //compute branch target address
+assign sel_branch = Branch && zero; //mux selector for branch
+assign branch_or_PcPlus4 = sel_branch ? branch_target : pc_plus4; //mux for branch
+
+//Jump
+assign jump_target = {pc_plus4[31:28], instruction[25:0], 2'b00}; //compute jump target address using concatination 
+assign next_pc = Jump ? jump_target : branch_or_PcPlus4; //mux for jump
+
 
 //================
 //MEMORY
@@ -201,10 +215,10 @@ assign read_data[31:24] = d_mem[alu_result[31:0]+3];
 
 assign write_data_mem = rd_data2; //data to write to the data memory
 
-//write to the data memory
+//write to the data memory 
 always_comb begin : mem_write
     next_d_mem = next_d_mem: d_mem; //default
-    if (MemWrite) begin
+    if (MemWrite) begin  //approach writes write_data_mem (32 bits) to the byte-addressable next_d_mem
         next_d_mem[alu_result[31:0] +0] = write_data_mem[7:0];
         next_d_mem[alu_result[31:0] +1] = write_data_mem[15:8];
         next_d_mem[alu_result[31:0] +2] = write_data_mem[23:16];
