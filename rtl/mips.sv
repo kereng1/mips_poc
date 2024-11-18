@@ -1,20 +1,3 @@
-// This rtl file is the MIPS CPU.
-//single cycle implementation
-//fetch, decode, execute, memory, writeback
-
-//define the RST_DFF macro this is the PC reg.
-`define RST_DFF(q, d, clk, rst)                                \
-    always_ff @(posedge clk or posedge rst) begin              \
-        q <= (rst) ? 0 : d;                                     \
-    end                                                                 
-
-//define the DFF macro
-`define DFF(q, d, clk)                         \
-    always_ff @(posedge clk) begin             \
-        q <= d;                                \
-    end
-
-
 module mips(
     input logic clk,
     input logic rst
