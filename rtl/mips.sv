@@ -3,21 +3,16 @@
 //fetch, decode, execute, memory, writeback
 
 //define the RST_DFF macro this is the PC reg.
-`define RST_DFF(q, d, clk, rst) begin                                   \
-    always_ff @(posedge clk or posedge rst) begin                       \
-        q <= (rst) ? 0 : d; //if reset is high, then q = 0, else q = d  \
-    end                                                                 \
-end
+`define RST_DFF(q, d, clk, rst)                                \
+    always_ff @(posedge clk or posedge rst) begin              \
+        q <= (rst) ? 0 : d;                                     \
+    end                                                                 
 
 //define the DFF macro
-`define DFF(q, d, clk) begin                   \
+`define DFF(q, d, clk)                         \
     always_ff @(posedge clk) begin             \
         q <= d;                                \
-    end                                        \
-end
-
-//define the SIGN_EXTEND macro
-`define SIGN_EXTEND(TOTAL_SIZE, DATA) ({{TOTAL_SIZE-$bits(DATA){DATA[$bits(DATA)-1]}}, DATA})
+    end
 
 
 module mips(
@@ -65,6 +60,13 @@ logic [31:0] sign_extended_imm; //sign extended immidiate value
 logic [31:0] alu_in1;
 logic [31:0] alu_in2;
 
+logic [31:0] rd_data1; //output
+logic [31:0] rd_data2; //output
+logic [4:0] rs; //input
+logic [4:0] rt; //input
+logic [4:0] rd; //input
+
+
 //defining the instruction signal for ALU control
 typedef enum logic [5:0] {
     ADD = 6'b100000,
@@ -81,12 +83,15 @@ t_alu_ctrl ALUCtrl; //ALU control signals
 //defining the opcode input for the main control unit
 typedef enum logic [5:0] {
     R_TYPE = 6'b000000,
-    ADDI = 6'b001000,
-    LW = 6'b100011,
-    SW = 6'b101011,
-    BEQ = 6'b000100,
-    J = 6'b000010
+    ADDI   = 6'b001000,
+    LW     = 6'b100011,
+    SW     = 6'b101011,
+    BEQ    = 6'b000100,
+    J      = 6'b000010,
+    BRANCH = 6'b000101,        // Define custom operation for branch
+    LOAD_STORE = 6'b000110     // Define custom operation for load/store
 } t_opcode;
+
 
 //=====================
 //FETCH
@@ -129,19 +134,12 @@ assign RegWrite = (opcode == R_TYPE || opcode == LW || opcode == ADDI);
 assign rs = instruction[25:21];
 assign rt = instruction[20:16];
 assign rd = instruction[15:11];
-assign sign_extended_imm = `SIGN_EXTEND(32, nstruction[15:0]);
+assign sign_extended_imm = {{16{instruction[15]}}, instruction[15:0]}; //sign extension
 
 //.....................
 //Register File
 //.....................
 `DFF (registers, next_registers, clk); //dff for the register file
-
-//read the registers
-logic [31:0] rd_data1; //output
-logic [31:0] rd_data2; //output
-logic [4:0] rs; //input
-logic [4:0] rt; //input
-logic [4:0] rd; //input
 
 assign rd_data1 = registers[rs];
 assign rd_data2 = registers[rt];
@@ -207,7 +205,7 @@ assign next_pc = Jump ? jump_target : branch_or_PcPlus4; //mux for jump
 // 1) read/write to data memory
 
 //read from data memory
-`Dff (d_mem, next_d_mem, clk); //dff for the data memory
+`DFF (d_mem, next_d_mem, clk); //dff for the data memory
 assign read_data[7:0] = d_mem[alu_result[31:0]+0];
 assign read_data[15:8] = d_mem[alu_result[31:0]+1];
 assign read_data[23:16] = d_mem[alu_result[31:0]+2];
@@ -217,7 +215,7 @@ assign write_data_mem = rd_data2; //data to write to the data memory
 
 //write to the data memory 
 always_comb begin : mem_write
-    next_d_mem = next_d_mem: d_mem; //default
+    next_d_mem = d_mem; //default
     if (MemWrite) begin  //approach writes write_data_mem (32 bits) to the byte-addressable next_d_mem
         next_d_mem[alu_result[31:0] +0] = write_data_mem[7:0];
         next_d_mem[alu_result[31:0] +1] = write_data_mem[15:8];
