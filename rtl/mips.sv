@@ -167,12 +167,13 @@ assign alu_in2 = ALUSrc ? sign_extended_imm : rd_data2;
 // ALU control logic based on ALUOp 
 always_comb begin
     case (ALUOp)
-        R_TYPE: ALUCtrl = instruction[5:0];   // Use funct field for R-type
-        BRANCH: ALUCtrl = SUB;                // Set to SUB for branch comparison
-        LOAD_STORE: ALUCtrl = ADD;            // Set to ADD for load/store address calculation
-        default: ALUCtrl = ADD;               // Default to ADD
+        R_TYPE: ALUCtrl = t_alu_ctrl'(instruction[5:0]); // Explicitly cast to t_alu_ctrl
+        BRANCH: ALUCtrl = SUB;                          // Set to SUB for branch comparison
+        LOAD_STORE: ALUCtrl = ADD;                      // Set to ADD for load/store address calculation
+        default: ALUCtrl = ADD;                         // Default to ADD
     endcase
 end
+
 
 //ALU operation
 always_comb begin : alu
