@@ -141,8 +141,8 @@ assign sign_extended_imm = {{16{instruction[15]}}, instruction[15:0]}; //sign ex
 //.....................
 `DFF (registers, next_registers, clk); //dff for the register file
 
-assign rd_data1 = registers[rs];
-assign rd_data2 = registers[rt];
+assign rd_data1 = (rs == 5'b0) ? 32'b0 : registers[rs];
+assign rd_data2 = (rt == 5'b0) ? 32'b0 : registers[rt];
 
 //write to the register file
 assign write_ptr = RegDst ? rd : rt; //wich register to write to (mux for write register)
