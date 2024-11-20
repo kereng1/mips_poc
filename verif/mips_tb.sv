@@ -1,4 +1,4 @@
-module tb_mips;
+module mips_tb;
 
     // Declare signals to connect to the DUT
     logic clk;
@@ -19,7 +19,7 @@ module tb_mips;
     // Reset logic
     initial begin
         rst = 1;          // Assert reset
-        #100 rst = 0;      // Deassert reset after 100ns
+        #100 rst = 0;     // Deassert reset after 100ns
     end
 
     // Test sequence (if needed for further control)
@@ -28,8 +28,11 @@ module tb_mips;
         #1000;             // Run simulation for 1000ns
         $finish;          // End simulation
     end
-//using XMR will monitor the DUT components 
-initial begin
-    $monitor("Time: %0t | instruction: %h | PC: %h | ALU in1 %h | ALU in2: %h | ALU result: %h " ,$time , clk, rst);
-end
+
+    // Monitor signals from the DUT
+    initial begin
+        $monitor("Time: %0t | PC: %h | instruction: %h | rs: %h | rt: %h | rd: %h | ALU in1: %h | ALU in2: %h | ALU result: %h | zero: %b",
+                 $time, dut.pc, dut.instruction, dut.rs, dut.rt, dut.rd, dut.alu_in1, dut.alu_in2, dut.alu_result, dut.zero);
+    end
+
 endmodule
