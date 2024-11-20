@@ -1,11 +1,11 @@
-# this is a simple python script that compiles the assembly code into machine code
-#the script reads the assembly code from the file and writes the machine code to another file
-
 import sys
 import re
 
-# Define opcode and function code mapping for R-type instructions
+# Define opcode and function code mapping for R-type and I-type instructions
 R_TYPE_OPCODE = "000000"  # Opcode for R-type instructions
+I_TYPE_OPCODES = {
+    "ADDI": "001000",  # Opcode for ADDI
+}
 FUNCTION_CODES = {
     "ADD": "100000",
     "SUB": "100010",
@@ -33,27 +33,41 @@ for i in range(32):
 def parse_instruction(instruction):
     """Parses a single MIPS instruction into binary."""
     parts = re.split(r"[,\s]+", instruction.strip())
-    if len(parts) < 4:
+    if len(parts) < 2:
         raise ValueError(f"Invalid instruction format: {instruction}")
     
     op = parts[0].upper()
-    rd, rs, rt = parts[1], parts[2], parts[3]
-    
-    if op not in FUNCTION_CODES:
+
+    if op in FUNCTION_CODES:  # R-type instruction
+        if len(parts) != 4:
+            raise ValueError(f"Invalid R-type instruction format: {instruction}")
+        rd, rs, rt = parts[1], parts[2], parts[3]
+        rs_bin = REGISTER_MAP.get(rs)
+        rt_bin = REGISTER_MAP.get(rt)
+        rd_bin = REGISTER_MAP.get(rd)
+        if None in (rs_bin, rt_bin, rd_bin):
+            raise ValueError(f"Invalid register in instruction: {instruction}")
+        shamt = "00000"  # Shift amount is always 0 for ADD and SUB
+        func = FUNCTION_CODES[op]
+        return f"{R_TYPE_OPCODE}{rs_bin}{rt_bin}{rd_bin}{shamt}{func}"
+
+    elif op in I_TYPE_OPCODES:  # I-type instruction (e.g., ADDI)
+        if len(parts) != 4:
+            raise ValueError(f"Invalid I-type instruction format: {instruction}")
+        rt, rs, imm = parts[1], parts[2], parts[3]
+        rs_bin = REGISTER_MAP.get(rs)
+        rt_bin = REGISTER_MAP.get(rt)
+        if None in (rs_bin, rt_bin):
+            raise ValueError(f"Invalid register in instruction: {instruction}")
+        try:
+            imm_bin = format(int(imm), "016b")
+        except ValueError:
+            raise ValueError(f"Invalid immediate value in instruction: {instruction}")
+        opcode = I_TYPE_OPCODES[op]
+        return f"{opcode}{rs_bin}{rt_bin}{imm_bin}"
+
+    else:
         raise ValueError(f"Unsupported operation: {op}")
-    
-    # Get binary representations for registers
-    rs_bin = REGISTER_MAP.get(rs)
-    rt_bin = REGISTER_MAP.get(rt)
-    rd_bin = REGISTER_MAP.get(rd)
-    
-    if None in (rs_bin, rt_bin, rd_bin):
-        raise ValueError(f"Invalid register in instruction: {instruction}")
-    
-    # Construct the binary representation of the instruction
-    shamt = "00000"  # Shift amount is always 0 for ADD and SUB
-    func = FUNCTION_CODES[op]
-    return f"{R_TYPE_OPCODE}{rs_bin}{rt_bin}{rd_bin}{shamt}{func}"
 
 def assemble(input_file, output_file):
     """Assembles a MIPS ASM file into machine code."""
