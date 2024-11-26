@@ -128,7 +128,7 @@ assign Branch = (opcode == BEQ);
 assign MemRead = (opcode == LW);
 assign MemtoReg = (opcode == LW);
 assign MemWrite = (opcode == SW);
-assign ALUSrc = (opcode !== R_TYPE); //take the immidiate value if not Rtype (for lw and addi)
+assign ALUSrc = (opcode !== R_TYPE && opcode !== BEQ); //take the immidiate value if not Rtype/Branch (for lw and addi)
 assign RegWrite = (opcode == R_TYPE || opcode == LW || opcode == ADDI);
 assign ALUOp = (opcode == R_TYPE) ? 2'b10 :  // R-type instructions
                (opcode == BEQ)    ? 2'b01 :  // Branch instructions
@@ -190,8 +190,6 @@ always_comb begin
         endcase
     end
 end
-
-
 
 //ALU operation
 always_comb begin : alu

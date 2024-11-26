@@ -11,12 +11,20 @@ ADDI $t2, $zero, 5       # $t2 = 5
 ADD $t3, $t0, $t1        # $t3 = $t0 + $t1 = 10 + 20 = 30
 SUB $t4, $t3, $t2        # $t4 = $t3 - $t2 = 30 - 5 = 25
 
-# Branch test
-#BEQ $t0, $t1, SKIP       # Does not jump (10 != 20)
-#ADDI $t5, $zero, 1       # This instruction executes if BEQ does not jump
+# BEQ test: does not jump (because $t0 != $t1)
+BEQ $t0, $t1, NO_JUMP    # Branch to NO_JUMP if $t0 == $t1 (does not branch)
 
-#BEQ $t0, $t0, SKIP2      # Jumps (10 == 10)
-#ADDI $t6, $zero, 2       # This instruction is skipped due to the branch
+# Additional instruction to verify no branch
+ADDI $t5, $zero, 100     # $t5 = 100 (this should execute)
 
-#SKIP: ADDI $t5, $zero, 0 # $t5 = 0
-#SKIP2: ADDI $t6, $zero, 3 # $t6 = 3
+# BEQ test: jumps (because $t0 == $t0)
+BEQ $t0, $t0, DO_JUMP    # Branch to DO_JUMP if $t0 == $t0 (branches)
+
+# This instruction is skipped due to the branch
+ADDI $t6, $zero, 200     # $t6 = 200 (this should not execute)
+
+# NO_JUMP label
+NO_JUMP: ADDI $t7, $zero, 300 # $t7 = 300 (executed after first BEQ)
+
+# DO_JUMP label
+DO_JUMP: ADDI $t8, $zero, 400 # $t8 = 400 (executed after second BEQ)

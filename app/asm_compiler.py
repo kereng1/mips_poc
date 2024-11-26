@@ -6,6 +6,7 @@ import re
 R_TYPE_OPCODE = "000000"  # Opcode for R-type instructions
 I_TYPE_OPCODES = {
     "ADDI": "001000",  # Opcode for ADDI
+    "BEQ": "000100",  # Opcode for BEQ
 }
 FUNCTION_CODES = {
     "ADD": "100000",
@@ -66,21 +67,62 @@ def parse_instruction(instruction):
             raise ValueError(f"Invalid immediate value in instruction: {instruction}")
         opcode = I_TYPE_OPCODES[op]
         return f"{opcode}{rs_bin}{rt_bin}{imm_bin}"
+    
+    elif op == "BEQ":  # Special case for BEQ
+        if len(parts) != 4:
+            raise ValueError(f"Invalid BEQ instruction format: {instruction}")
+        rs, rt, label = parts[1], parts[2], parts[3]
+        rs_bin = REGISTER_MAP.get(rs)
+        rt_bin = REGISTER_MAP.get(rt)
+        if None in (rs_bin, rt_bin):
+            raise ValueError(f"Invalid register in BEQ instruction: {instruction}")
+        # Calculate the immediate offset (label will be resolved as needed)
+        try:
+            # Assume label is provided as a numeric offset for simplicity
+            imm_bin = format(int(label), "016b")
+        except ValueError:
+            raise ValueError(f"Invalid branch offset in BEQ instruction: {instruction}")
+        opcode = I_TYPE_OPCODES[op]
+        return f"{opcode}{rs_bin}{rt_bin}{imm_bin}"
 
     else:
         raise ValueError(f"Unsupported operation: {op}. Skipping...")
 
 def assemble(input_file, output_file):
     """Assembles a MIPS ASM file into machine code."""
-    with open(input_file, "r") as infile, open(output_file, "w") as outfile:
-        for line_num, line in enumerate(infile, start=1):
-            original_line = line.strip()  # Save the original line for the comment
-            # Remove comments and trim whitespace
-            line = re.sub(r"#.*", "", line).strip()  # Remove inline comments starting with #
-            line = re.sub(r"//.*", "", line).strip()  # Remove inline comments starting with //
-            if not line:  # Skip empty lines after removing comments
+    label_addresses = {}  # Dictionary to store label addresses
+    instructions = []  # List to store instructions with labels for second pass
+
+    # First Pass: Identify label addresses
+    with open(input_file, "r") as infile:
+        address = 0
+        for line in infile:
+            original_line = line.strip()
+            line = re.sub(r"#.*", "", line).strip()  # Remove comments
+            line = re.sub(r"//.*", "", line).strip()  # Remove inline comments
+            if not line:
                 continue
+            if ":" in line:  # Label definition
+                label, *rest = line.split(":")
+                label_addresses[label.strip()] = address
+                line = ":".join(rest).strip()  # Remove label from instruction
+                if not line:  # If the line was just a label, skip it
+                    continue
+            instructions.append((address, original_line, line))  # Save for second pass
+            address += 1
+
+    # Second Pass: Assemble instructions
+    with open(output_file, "w") as outfile:
+        for address, original_line, line in instructions:
             try:
+                # Replace labels with offsets
+                if "BEQ" in line:
+                    parts = re.split(r"[,\s]+", line)
+                    label = parts[-1]  # Assume label is the last part
+                    if label in label_addresses:
+                        offset = label_addresses[label] - (address + 1)
+                        parts[-1] = str(offset)
+                        line = " ".join(parts)
                 # Parse the instruction and get binary string
                 binary_instruction = parse_instruction(line)
                 # Convert the 32-bit binary instruction into 8-bit hexadecimal chunks
@@ -88,7 +130,8 @@ def assemble(input_file, output_file):
                 # Write the full instruction in hex followed by the original line as a comment
                 outfile.write(f"{hex_instruction}  # {original_line}\n")
             except ValueError as e:
-                print(f"Error processing line {line_num}: '{original_line}' - {e}")
+                print(f"Error processing line {address}: '{original_line}' - {e}")
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:

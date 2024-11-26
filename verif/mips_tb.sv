@@ -36,8 +36,8 @@ module mips_tb;
 
     // Monitor signals from the DUT
     initial begin
-        $monitor("Time: %0t | PC: %h | instruction: %b | ALUCtrl: %b | ALU in1: %h | ALU in2: %h | ALU result: %h | zero: %b |ALUop: %b ",
-                 $time, dut.pc, dut.instruction[5:0], dut.ALUCtrl, dut.alu_in1, dut.alu_in2, dut.alu_result, dut.zero, dut.ALUOp,);
+        $monitor("Time: %0t | PC: %h | instruction: %h | ALUCtrl: %b | ALU in1: %h | ALU in2: %h | ALU result: %h | zero: %b |ALUop: %b ",
+                 $time, dut.pc, dut.instruction, dut.ALUCtrl, dut.alu_in1, dut.alu_in2, dut.alu_result, dut.zero, dut.ALUOp,);
     end
 
     

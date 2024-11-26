@@ -1,17 +1,21 @@
 # vsim -c -do "run -all" mips_tb 
-# Start time: 16:44:31 on Nov 26,2024
+# Start time: 17:48:53 on Nov 26,2024
 # Loading sv_std.std
 # Loading work.mips_tb
 # Loading work.mips
 # run -all
-# Time: 0 | PC: 00000000 | instruction: 001010 | ALUCtrl: 100000 | ALU in1: 00000000 | ALU in2: 0000000a | ALU result: 0000000a | zero: 0 |ALUop: 00  
-# Time: 110 | PC: 00000004 | instruction: 010100 | ALUCtrl: 100000 | ALU in1: 00000000 | ALU in2: 00000014 | ALU result: 00000014 | zero: 0 |ALUop: 00  
-# Time: 130 | PC: 00000008 | instruction: 000101 | ALUCtrl: 100000 | ALU in1: 00000000 | ALU in2: 00000005 | ALU result: 00000005 | zero: 0 |ALUop: 00  
-# Time: 150 | PC: 0000000c | instruction: 100000 | ALUCtrl: 100000 | ALU in1: 0000000a | ALU in2: 00000014 | ALU result: 0000001e | zero: 0 |ALUop: 10  
-# Time: 170 | PC: 00000010 | instruction: 100010 | ALUCtrl: 100010 | ALU in1: 0000001e | ALU in2: 00000005 | ALU result: 00000019 | zero: 0 |ALUop: 10  
-# Time: 190 | PC: 00000014 | instruction: xxxxxx | ALUCtrl: 100000 | ALU in1: xxxxxxxx | ALU in2: xxxxxxxx | ALU result: xxxxxxxx | zero: x |ALUop: xx  
-# Time: 210 | PC: xxxxxxxx | instruction: xxxxxx | ALUCtrl: 100000 | ALU in1: xxxxxxxx | ALU in2: xxxxxxxx | ALU result: xxxxxxxx | zero: x |ALUop: xx  
+# Time: 0 | PC: 00000000 | instruction: 2008000a | ALUCtrl: 100000 | ALU in1: 00000000 | ALU in2: 0000000a | ALU result: 0000000a | zero: 0 |ALUop: 00  
+# Time: 110 | PC: 00000004 | instruction: 20090014 | ALUCtrl: 100000 | ALU in1: 00000000 | ALU in2: 00000014 | ALU result: 00000014 | zero: 0 |ALUop: 00  
+# Time: 130 | PC: 00000008 | instruction: 200a0005 | ALUCtrl: 100000 | ALU in1: 00000000 | ALU in2: 00000005 | ALU result: 00000005 | zero: 0 |ALUop: 00  
+# Time: 150 | PC: 0000000c | instruction: 01095820 | ALUCtrl: 100000 | ALU in1: 0000000a | ALU in2: 00000014 | ALU result: 0000001e | zero: 0 |ALUop: 10  
+# Time: 170 | PC: 00000010 | instruction: 016a6022 | ALUCtrl: 100010 | ALU in1: 0000001e | ALU in2: 00000005 | ALU result: 00000019 | zero: 0 |ALUop: 10  
+# Time: 190 | PC: 00000014 | instruction: 11280003 | ALUCtrl: 100010 | ALU in1: 00000014 | ALU in2: 0000000a | ALU result: 0000000a | zero: 0 |ALUop: 01  
+# Time: 210 | PC: 00000018 | instruction: 200d0064 | ALUCtrl: 100000 | ALU in1: 00000000 | ALU in2: 00000064 | ALU result: 00000064 | zero: 0 |ALUop: 00  
+# Time: 230 | PC: 0000001c | instruction: 11080002 | ALUCtrl: 100010 | ALU in1: 0000000a | ALU in2: 0000000a | ALU result: 00000000 | zero: 1 |ALUop: 01  
+# Time: 250 | PC: 00000028 | instruction: 20180190 | ALUCtrl: 100000 | ALU in1: 00000000 | ALU in2: 00000190 | ALU result: 00000190 | zero: 0 |ALUop: 00  
+# Time: 270 | PC: 0000002c | instruction: xxxxxxxx | ALUCtrl: 100000 | ALU in1: xxxxxxxx | ALU in2: xxxxxxxx | ALU result: xxxxxxxx | zero: x |ALUop: xx  
+# Time: 290 | PC: xxxxxxxx | instruction: xxxxxxxx | ALUCtrl: 100000 | ALU in1: xxxxxxxx | ALU in2: xxxxxxxx | ALU result: xxxxxxxx | zero: x |ALUop: xx  
 # ** Note: $finish    : verif/mips_tb.sv(34)
 #    Time: 1 ns  Iteration: 0  Instance: /mips_tb
-# End time: 16:44:31 on Nov 26,2024, Elapsed time: 0:00:00
+# End time: 17:48:54 on Nov 26,2024, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
