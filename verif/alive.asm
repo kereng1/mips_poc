@@ -1,2 +1,22 @@
 
-//simple ADD SUB test for my mips CPU 
+#simple ADD SUB test for my mips CPU 
+#the input in assembly 
+
+# Initialize registers with ADDI
+ADDI $t0, $zero, 10      # $t0 = 10
+ADDI $t1, $zero, 20      # $t1 = 20
+ADDI $t2, $zero, 5       # $t2 = 5
+
+# Perform arithmetic operations
+ADD $t3, $t0, $t1        # $t3 = $t0 + $t1 = 10 + 20 = 30
+SUB $t4, $t3, $t2        # $t4 = $t3 - $t2 = 30 - 5 = 25
+
+# Branch test
+#BEQ $t0, $t1, SKIP       # Does not jump (10 != 20)
+#ADDI $t5, $zero, 1       # This instruction executes if BEQ does not jump
+
+#BEQ $t0, $t0, SKIP2      # Jumps (10 == 10)
+#ADDI $t6, $zero, 2       # This instruction is skipped due to the branch
+
+#SKIP: ADDI $t5, $zero, 0 # $t5 = 0
+#SKIP2: ADDI $t6, $zero, 3 # $t6 = 3

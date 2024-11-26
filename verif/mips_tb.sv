@@ -24,6 +24,11 @@ module mips_tb;
 
     // Test sequence (if needed for further control)
     initial begin
+        //load the i_mem with the instructions using the $readmemh system task
+        //the location of the file is output_app/load_mem.sv
+        $readmemh("output_app/load_mem.sv", dut.i_mem);
+        $readmemh("output_app/load_mem.sv", dut.next_i_mem);
+
         // Initialize and observe behavior
         #1000;             // Run simulation for 1000ns
         $finish;          // End simulation
@@ -31,8 +36,10 @@ module mips_tb;
 
     // Monitor signals from the DUT
     initial begin
-        $monitor("Time: %0t | PC: %h | instruction: %h | rs: %h | rt: %h | rd: %h | ALU in1: %h | ALU in2: %h | ALU result: %h | zero: %b",
-                 $time, dut.pc, dut.instruction, dut.rs, dut.rt, dut.rd, dut.alu_in1, dut.alu_in2, dut.alu_result, dut.zero);
+        $monitor("Time: %0t | PC: %h | instruction: %b | ALUCtrl: %b | ALU in1: %h | ALU in2: %h | ALU result: %h | zero: %b |ALUop: %b ",
+                 $time, dut.pc, dut.instruction[5:0], dut.ALUCtrl, dut.alu_in1, dut.alu_in2, dut.alu_result, dut.zero, dut.ALUOp,);
     end
+
+    
 
 endmodule

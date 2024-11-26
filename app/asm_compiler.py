@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 import re
 
@@ -67,21 +68,27 @@ def parse_instruction(instruction):
         return f"{opcode}{rs_bin}{rt_bin}{imm_bin}"
 
     else:
-        raise ValueError(f"Unsupported operation: {op}")
+        raise ValueError(f"Unsupported operation: {op}. Skipping...")
 
 def assemble(input_file, output_file):
     """Assembles a MIPS ASM file into machine code."""
-    with open(input_file, "r") as infile, open(output_file, "wb") as outfile:
-        for line in infile:
-            line = line.strip()
-            if not line or line.startswith("#"):  # Skip empty lines or comments
+    with open(input_file, "r") as infile, open(output_file, "w") as outfile:
+        for line_num, line in enumerate(infile, start=1):
+            original_line = line.strip()  # Save the original line for the comment
+            # Remove comments and trim whitespace
+            line = re.sub(r"#.*", "", line).strip()  # Remove inline comments starting with #
+            line = re.sub(r"//.*", "", line).strip()  # Remove inline comments starting with //
+            if not line:  # Skip empty lines after removing comments
                 continue
             try:
+                # Parse the instruction and get binary string
                 binary_instruction = parse_instruction(line)
-                # Convert binary string to bytes and write to output file
-                outfile.write(int(binary_instruction, 2).to_bytes(4, byteorder="big"))
+                # Convert the 32-bit binary instruction into 8-bit hexadecimal chunks
+                hex_instruction = ''.join(f"{int(binary_instruction[i:i+8], 2):02X}" for i in range(0, 32, 8))
+                # Write the full instruction in hex followed by the original line as a comment
+                outfile.write(f"{hex_instruction}  # {original_line}\n")
             except ValueError as e:
-                print(f"Error processing line '{line}': {e}")
+                print(f"Error processing line {line_num}: '{original_line}' - {e}")
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:

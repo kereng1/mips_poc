@@ -42,12 +42,13 @@ logic [31:0] alu_result;
 logic [7:0] d_mem [127: 0]; 
 logic [7:0] next_d_mem [127: 0];
 
+
 logic       RegDst;
 logic       Jump;
 logic       Branch;
 logic       MemRead;
 logic       MemtoReg;
-logic       ALUOp;
+logic [1:0] ALUOp; //lw/sw=00, R-type=10, beq=01
 logic       MemWrite;
 logic       ALUSrc;
 logic       RegWrite;
@@ -126,10 +127,14 @@ assign Jump = (opcode == J);
 assign Branch = (opcode == BEQ);
 assign MemRead = (opcode == LW);
 assign MemtoReg = (opcode == LW);
-assign ALUOp = (opcode == R_TYPE); //maby need to add more ,not only for Rtype but for all******
 assign MemWrite = (opcode == SW);
 assign ALUSrc = (opcode !== R_TYPE); //take the immidiate value if not Rtype (for lw and addi)
 assign RegWrite = (opcode == R_TYPE || opcode == LW || opcode == ADDI);
+assign ALUOp = (opcode == R_TYPE) ? 2'b10 :  // R-type instructions
+               (opcode == BEQ)    ? 2'b01 :  // Branch instructions
+               (opcode == LW || opcode == SW || opcode == ADDI) ? 2'b00 :  // Load/Store/ADDI
+               2'b00; // Default to ADD for safety
+
 
 assign rs = instruction[25:21];
 assign rt = instruction[20:16];
@@ -166,13 +171,26 @@ assign alu_in2 = ALUSrc ? sign_extended_imm : rd_data2;
 
 // ALU control logic based on ALUOp 
 always_comb begin
-    case (ALUOp)
-        R_TYPE: ALUCtrl = t_alu_ctrl'(instruction[5:0]); // Explicitly cast to t_alu_ctrl
-        BRANCH: ALUCtrl = SUB;                          // Set to SUB for branch comparison
-        LOAD_STORE: ALUCtrl = ADD;                      // Set to ADD for load/store address calculation
-        default: ALUCtrl = ADD;                         // Default to ADD
-    endcase
+    ALUCtrl = ADD; // Default to ADD for safety
+
+    if (ALUOp == 2'b00) begin // Load/Store or ADDI operations
+        ALUCtrl = ADD;
+    end else if (ALUOp == 2'b01) begin // Branch comparison
+        ALUCtrl = SUB;
+    end else if (ALUOp == 2'b10) begin// R-type operations based on `funct` field
+        case (instruction[5:0])
+            ADD: ALUCtrl = ADD;
+            SUB: ALUCtrl = SUB;
+            AND: ALUCtrl = AND;
+            OR:  ALUCtrl = OR;
+            NOR: ALUCtrl = NOR;
+            XOR: ALUCtrl = XOR;
+            SLT: ALUCtrl = SLT;
+            default: ALUCtrl = ADD; // Default to ADD for undefined `funct`
+        endcase
+    end
 end
+
 
 
 //ALU operation
