@@ -1,5 +1,5 @@
 # vsim -c -do "run -all" mips_tb 
-# Start time: 17:48:53 on Nov 26,2024
+# Start time: 18:01:59 on Nov 26,2024
 # Loading sv_std.std
 # Loading work.mips_tb
 # Loading work.mips
@@ -17,5 +17,5 @@
 # Time: 290 | PC: xxxxxxxx | instruction: xxxxxxxx | ALUCtrl: 100000 | ALU in1: xxxxxxxx | ALU in2: xxxxxxxx | ALU result: xxxxxxxx | zero: x |ALUop: xx  
 # ** Note: $finish    : verif/mips_tb.sv(34)
 #    Time: 1 ns  Iteration: 0  Instance: /mips_tb
-# End time: 17:48:54 on Nov 26,2024, Elapsed time: 0:00:01
+# End time: 18:02:00 on Nov 26,2024, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
