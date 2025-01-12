@@ -35,7 +35,7 @@ logic [7:0] i_mem [127: 0]; //instruction memory matrix 128x32 each instruction 
 logic [7:0] next_i_mem [127: 0]; //is this the Read data in ss mips?
 logic [31:0] write_data_reg; //write data to the register file
 logic [31:0] write_data_mem; //write data to the Data memory
-logic [4:0] write_ptr; ///////////////do i neeed to add this?//////////
+logic [4:0] write_ptr; 
 logic [31:0] read_data; 
 logic [31:0] alu_result;
 
@@ -91,7 +91,7 @@ typedef enum logic [5:0] {
     J      = 6'b000010,
     BRANCH = 6'b000101,        // Define custom operation for branch
     LOAD_STORE = 6'b000110     // Define custom operation for load/store
-} t_opcode;
+} t_opcode; //this will be the used for the Instruction[31-26]
 
 
 //=====================
@@ -118,9 +118,10 @@ assign instruction[31:24] = i_mem[pc[31:0]+3];
 //DECODE
 //=====================
 // 1) decode the instruction: reading from refister_file, and control signals
-// 2) sighn extension for immidiate values and speculated calculation of branch address
+// 2) sighn extension for immidiate values
+// 3) speculated calculation of branch address
 t_opcode opcode; //define opcode variable of type t_opcode (like list/stuct in C)
-assign opcode[5:0] = instruction[31:26];
+assign opcode[5:0] = instruction[31:26]; //assigning value to opcode
 
 assign RegDst = (opcode == R_TYPE);
 assign Jump = (opcode == J);
@@ -128,7 +129,7 @@ assign Branch = (opcode == BEQ);
 assign MemRead = (opcode == LW);
 assign MemtoReg = (opcode == LW);
 assign MemWrite = (opcode == SW);
-assign ALUSrc = (opcode !== R_TYPE && opcode !== BEQ); //take the immidiate value if not Rtype/Branch (for lw and addi)
+assign ALUSrc = (opcode !== R_TYPE && opcode !== BEQ); //take the immidiate value if not Rtype/Branch (for lw/sw and addi)
 assign RegWrite = (opcode == R_TYPE || opcode == LW || opcode == ADDI);
 assign ALUOp = (opcode == R_TYPE) ? 2'b10 :  // R-type instructions
                (opcode == BEQ)    ? 2'b01 :  // Branch instructions
@@ -152,9 +153,10 @@ assign rd_data2 = (rt == 5'b0) ? 32'b0 : registers[rt];
 //write to the register file
 assign write_ptr = RegDst ? rd : rt; //wich register to write to (mux for write register)
 always_comb begin : rf_write         //rf_write is the name of the always_comb block
-    next_registers = registers;      //default
+    next_registers = registers;      //default: Copy current registers file state to next_registers
+
     if (RegWrite) begin
-        next_registers[write_ptr] = write_data_reg;
+        next_registers[write_ptr] = write_data_reg;  // Update register in the (write_ptr) with write_data_reg
     end 
 end 
 
@@ -163,7 +165,7 @@ end
 //EXECUTE
 //================
 // 1) ALU operation
-// 2) branch evaluation and jump calculation
+// 2) branch evaluation and jump address calculation
 
 //ALU
 assign alu_in1 = rd_data1;
