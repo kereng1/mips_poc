@@ -84,7 +84,47 @@ This concatenates two parts:
 instruction[15:0]: The original 16-bit value.
 
 
+--------------------------------------------------------
+### **Register File Write Logic**  
+This block handles selecting and updating a specific register in the register file based on control signals and input data.
 
+#### **Code Overview**
+```verilog
+// Determine which register to write to (mux for write register)
+assign write_ptr = RegDst ? rd : rt;
+
+// Combinational logic to handle register file write
+always_comb begin : rf_write
+    next_registers = registers; // Default: Copy current register file state
+    if (RegWrite) begin
+        next_registers[write_ptr] = write_data_reg; // Update selected register
+    end
+end
+```
+
+#### **Key Details**
+1. **`write_ptr`**:
+   - A 5-bit signal that determines which of the 32 registers to write to.
+   - Selected using a multiplexer:
+     - `RegDst = 1`: Write to register `rd`.
+     - `RegDst = 0`: Write to register `rt`.
+
+2. **`always_comb` Block**:
+   - Ensures combinational logic for writing to the register file:
+     - **Default Assignment**: `next_registers = registers;` ensures all registers retain their current values unless explicitly updated.
+     - **Conditional Update**: If `RegWrite` is active, the value in `write_data_reg` is written to the register indexed by `write_ptr`.
+
+3. **Why Use `always_comb`?**
+   - Guarantees **pure combinational behavior** (no latches or flip-flops).
+   - Automatically includes all signals (`RegWrite`, `write_ptr`, etc.) in the sensitivity list, reducing the risk of simulation mismatches.
+   - Ensures no unintended latches are inferred by requiring all conditions to be handled explicitly.
+
+#### **Functionality Summary**
+- Selects the register to write (`write_ptr`) based on the control signal `RegDst`.
+- Updates the selected register only if `RegWrite` is enabled.
+- Preserves the state of all other registers.
+
+---------------------------------------------- 
 
 
 
