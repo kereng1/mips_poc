@@ -1,5 +1,6 @@
 // Memory initialization for simulation
-// Generated from machine code
+// Generated from machine code (alive.sv file).
+// This will be given to TB to initialize instruction memory.
 
 0A 00 08 20 14 00 09 20 05 00 0A 20 20 58 09 01
 22 60 6A 01 03 00 28 11 64 00 0D 20 02 00 08 11

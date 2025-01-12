@@ -1,3 +1,5 @@
+// This file is the output of the file asm_compiler.py given input: alive.asm
+ 
 2008000A  # ADDI $t0, $zero, 10      # $t0 = 10
 20090014  # ADDI $t1, $zero, 20      # $t1 = 20
 200A0005  # ADDI $t2, $zero, 5       # $t2 = 5

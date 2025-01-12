@@ -76,7 +76,8 @@ using python we will create a sw "assembler" that will convert the assembly code
 
 6. **Run simulations**:
    - Execute the testbench to simulate the MIPS CPU with the provided assembly code and verify the results.
-   - Use a simulation tool (e.g., ModelSim, VCS) to run the testbench and observe the behavior of the MIPS CPU.
+   -#1 compile the code using the following command: `vlog.exe rtl/mips.sv verif/mips_tb.sv` 
+   #2 run the simulation using the following command: `vsim -c -do "run -all" mips_tb`  
    - Ensure that the CPU correctly executes the instructions and produces the expected outputs.
 
 
