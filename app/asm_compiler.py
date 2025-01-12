@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+# this is a simple python script that "translates" MIPS assembly code into machine code
+# it is used to compile the assembly code into machine code meaning:
+#The script reads the assembly code from "verif/alive.asm" and writes the machine code to another file "output_app/alive.sv"
 import sys
 import re
 
