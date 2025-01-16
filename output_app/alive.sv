@@ -1,5 +1,3 @@
-// This file is the output of the file asm_compiler.py given input: alive.asm
- 
 2008000A  # ADDI $t0, $zero, 10      # $t0 = 10
 20090014  # ADDI $t1, $zero, 20      # $t1 = 20
 200A0005  # ADDI $t2, $zero, 5       # $t2 = 5
@@ -11,3 +9,7 @@
 200E00C8  # ADDI $t6, $zero, 200     # $t6 = 200 (this should not execute)
 200F012C  # NO_JUMP: ADDI $t7, $zero, 300 # $t7 = 300 (executed after first BEQ)
 20180190  # DO_JUMP: ADDI $t8, $zero, 400 # $t8 = 400 (executed after second BEQ)
+2008007B  # ADDI $t0, $zero, 123
+0800000E  # J SOME_LABEL
+200903E7  # ADDI $t1, $zero, 999  # This should be skipped
+200901BC  # SOME_LABEL: ADDI $t1, $zero, 444  # Jumps here

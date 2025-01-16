@@ -1,6 +1,4 @@
-
-#simple ADD SUB test for my mips CPU 
-#the input in assembly 
+#simple ADD SUB Branch test for my mips CPU 
 
 # Initialize registers with ADDI
 ADDI $t0, $zero, 10      # $t0 = 10
@@ -28,3 +26,9 @@ NO_JUMP: ADDI $t7, $zero, 300 # $t7 = 300 (executed after first BEQ)
 
 # DO_JUMP label
 DO_JUMP: ADDI $t8, $zero, 400 # $t8 = 400 (executed after second BEQ)
+
+ADDI $t0, $zero, 123
+J SOME_LABEL
+ADDI $t1, $zero, 999  # This should be skipped
+
+SOME_LABEL: ADDI $t1, $zero, 444  # Jumps here
